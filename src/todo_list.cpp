@@ -146,7 +146,8 @@ void TodoList::draw(WINDOW *win) {
   }
 
   mvwprintw(win, height - 2, 2,
-            "a:Add d:Del Space:Toggle t:Tab x:DelTab h/l:Switch q:Quit");
+            "a:Add Item d:Del Item Space:Toggle t:Add Tab x:Del Tab h/l:Switch "
+            "Tab q:Quit");
   wrefresh(win);
 }
 
