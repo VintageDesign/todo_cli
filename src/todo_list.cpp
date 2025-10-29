@@ -1,4 +1,6 @@
 #include "todo_list.h"
+#include "todo_item.h"
+#include <algorithm>
 #include <fstream>
 #include <pwd.h>
 #include <sys/stat.h>
@@ -22,6 +24,13 @@ TodoList::TodoList() : selected(0) {
   filepath = getHomeDir() + "/.todo/list";
   ensureDirectoryExists();
   load();
+}
+
+void TodoList::sortList() {
+  std::sort(items.begin(), items.end(),
+            [](const TodoItem &a, const TodoItem &b) {
+              return !a.completed && b.completed;
+            });
 }
 
 void TodoList::load() {
@@ -61,6 +70,7 @@ void TodoList::save() {
 void TodoList::addItem(const std::string &text) {
   if (!text.empty()) {
     items.push_back({text, false});
+    sortList();
     save();
   }
 }
@@ -68,6 +78,7 @@ void TodoList::addItem(const std::string &text) {
 void TodoList::toggleCompleted() {
   if (!items.empty() && selected >= 0 && selected < items.size()) {
     items[selected].completed = !items[selected].completed;
+    sortList();
     save();
   }
 }
@@ -78,6 +89,7 @@ void TodoList::deleteItem() {
     if (selected >= items.size() && selected > 0) {
       selected--;
     }
+    sortList();
     save();
   }
 }

@@ -14,6 +14,7 @@ private:
 
   std::string getHomeDir();
   void ensureDirectoryExists();
+  void sortList();
 
 public:
   TodoList();
