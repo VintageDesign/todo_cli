@@ -20,7 +20,7 @@ void TodoList::ensureDirectoryExists() {
   mkdir(dir.c_str(), 0755);
 }
 
-TodoList::TodoList() : selected(0) {
+TodoList::TodoList() : selected(0), scroll_offset(0) {
   filepath = getHomeDir() + "/.todo/list";
   ensureDirectoryExists();
   load();
@@ -118,16 +118,26 @@ void TodoList::draw(WINDOW *win) {
     mvwprintw(win, 4, 2, "No items. Press 'a' to add one.");
   } else {
     int start_line = 4;
-    for (size_t i = 0; i < items.size(); i++) {
-      if (start_line + i >= height - 3)
-        break;
+    int visible_lines = height - 6;
 
-      if (i == selected) {
+    // Adjust scroll offset to keep selected item visible
+    if (selected < scroll_offset) {
+      scroll_offset = selected;
+    } else if (selected >= scroll_offset + visible_lines) {
+      scroll_offset = selected - visible_lines + 1;
+    }
+
+    // Draw visible items
+    for (int i = 0; i < visible_lines && scroll_offset + i < items.size();
+         i++) {
+      int item_index = scroll_offset + i;
+
+      if (item_index == selected) {
         wattron(win, A_REVERSE);
       }
 
-      std::string status = items[i].completed ? "[x]" : "[ ]";
-      std::string display = status + " " + items[i].text;
+      std::string status = items[item_index].completed ? "[x]" : "[ ]";
+      std::string display = status + " " + items[item_index].text;
 
       if (display.length() > width - 4) {
         display = display.substr(0, width - 7) + "...";
@@ -135,9 +145,15 @@ void TodoList::draw(WINDOW *win) {
 
       mvwprintw(win, start_line + i, 2, "%s", display.c_str());
 
-      if (i == selected) {
+      if (item_index == selected) {
         wattroff(win, A_REVERSE);
       }
+    }
+
+    // Show scroll indicator if needed
+    if (items.size() > visible_lines) {
+      mvwprintw(win, height - 3, width - 15, "[%d/%d]", selected + 1,
+                (int)items.size());
     }
   }
 

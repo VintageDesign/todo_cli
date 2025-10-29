@@ -10,6 +10,7 @@ class TodoList {
 private:
   std::vector<TodoItem> items;
   int selected;
+  int scroll_offset;
   std::string filepath;
 
   std::string getHomeDir();
