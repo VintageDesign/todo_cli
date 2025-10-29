@@ -1,4 +1,5 @@
 #include "input_dialog.h"
+#include "tab_manager.h"
 #include "todo_list.h"
 #include <ncurses.h>
 
@@ -15,11 +16,18 @@ int main() {
   WINDOW *main_win = newwin(height, width, 0, 0);
   keypad(main_win, TRUE);
 
-  TodoList todoList;
+  TabManager tabManager;
 
   bool running = true;
   while (running) {
-    todoList.draw(main_win);
+    TodoList *currentList = tabManager.getCurrentList();
+    if (!currentList)
+      break;
+
+    werase(main_win);
+    box(main_win, 0, 0);
+    tabManager.drawTabs(main_win);
+    currentList->draw(main_win);
 
     int ch = wgetch(main_win);
     switch (ch) {
@@ -31,29 +39,55 @@ int main() {
     case 'a':
     case 'A': {
       std::string text = getInput(main_win, "Enter new item:");
-      todoList.addItem(text);
+      currentList->addItem(text);
       break;
     }
 
     case 'd':
     case 'D':
-      if (todoList.size() > 0) {
-        todoList.deleteItem();
+      if (currentList->size() > 0) {
+        currentList->deleteItem();
       }
       break;
 
     case ' ':
-      todoList.toggleCompleted();
+      currentList->toggleCompleted();
       break;
 
     case KEY_UP:
     case 'k':
-      todoList.moveUp();
+      currentList->moveUp();
       break;
 
     case KEY_DOWN:
     case 'j':
-      todoList.moveDown();
+      currentList->moveDown();
+      break;
+
+    case 't':
+    case 'T': {
+      std::string tab_name = getInput(main_win, "Enter new tab name:");
+      if (!tab_name.empty()) {
+        tabManager.addTab(tab_name);
+      }
+      break;
+    }
+
+    case 'x':
+    case 'X':
+      if (tabManager.tabCount() > 1) {
+        tabManager.deleteCurrentTab();
+      }
+      break;
+
+    case KEY_LEFT:
+    case 'h':
+      tabManager.prevTab();
+      break;
+
+    case KEY_RIGHT:
+    case 'l':
+      tabManager.nextTab();
       break;
     }
   }

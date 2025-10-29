@@ -12,13 +12,13 @@ private:
   int selected;
   int scroll_offset;
   std::string filepath;
+  std::string name;
 
-  std::string getHomeDir();
-  void ensureDirectoryExists();
   void sortList();
 
 public:
   TodoList();
+  TodoList(const std::string &tab_name);
 
   void load();
   void save();
@@ -29,6 +29,7 @@ public:
   void moveDown();
   void draw(WINDOW *win);
   size_t size() const;
+  std::string getName() const;
 };
 
 #endif

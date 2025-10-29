@@ -1,28 +1,19 @@
 #include "todo_list.h"
 #include "todo_item.h"
+#include "utils.h"
 #include <algorithm>
 #include <fstream>
-#include <pwd.h>
-#include <sys/stat.h>
-#include <unistd.h>
 
-std::string TodoList::getHomeDir() {
-  const char *home = getenv("HOME");
-  if (home == nullptr) {
-    struct passwd *pw = getpwuid(getuid());
-    home = pw->pw_dir;
-  }
-  return std::string(home);
+TodoList::TodoList() : selected(0), scroll_offset(0), name("default") {
+  filepath = utils::getHomeDir() + "/.todo/list";
+  utils::ensureDirectoryExists();
+  load();
 }
 
-void TodoList::ensureDirectoryExists() {
-  std::string dir = getHomeDir() + "/.todo";
-  mkdir(dir.c_str(), 0755);
-}
-
-TodoList::TodoList() : selected(0), scroll_offset(0) {
-  filepath = getHomeDir() + "/.todo/list";
-  ensureDirectoryExists();
+TodoList::TodoList(const std::string &tab_name)
+    : selected(0), scroll_offset(0), name(tab_name) {
+  filepath = utils::getHomeDir() + "/.todo/" + tab_name;
+  utils::ensureDirectoryExists();
   load();
 }
 
@@ -105,13 +96,10 @@ void TodoList::moveDown() {
 }
 
 void TodoList::draw(WINDOW *win) {
-  werase(win);
-  box(win, 0, 0);
-
   int height, width;
   getmaxyx(win, height, width);
 
-  mvwprintw(win, 1, 2, "Todo List");
+  mvwprintw(win, 1, 2, "Todo List: %s", name.c_str());
   mvwprintw(win, 2, 2, "----------------------------------------");
 
   if (items.empty()) {
@@ -157,8 +145,11 @@ void TodoList::draw(WINDOW *win) {
     }
   }
 
-  mvwprintw(win, height - 2, 2, "a:Add d:Delete Space:Toggle q:Quit");
+  mvwprintw(win, height - 2, 2,
+            "a:Add d:Del Space:Toggle t:Tab x:DelTab h/l:Switch q:Quit");
   wrefresh(win);
 }
 
 size_t TodoList::size() const { return items.size(); }
+
+std::string TodoList::getName() const { return name; }

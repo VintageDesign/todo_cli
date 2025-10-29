@@ -1,6 +1,7 @@
 add_executable(todo)
 
-target_sources(todo PRIVATE main.cpp todo_list.cpp input_dialog.cpp)
+target_sources(todo PRIVATE main.cpp todo_list.cpp input_dialog.cpp
+                            tab_manager.cpp)
 
 find_package(Curses REQUIRED)
 target_link_libraries(todo PRIVATE ${CURSES_LIBRARIES})
