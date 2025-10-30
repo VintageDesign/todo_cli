@@ -6,6 +6,7 @@ namespace fs = std::filesystem;
 
 TabManager::TabManager() : current_tab(0) {
 
+  utils::ensureDirectoryExists();
   if (fs::is_empty(utils::getHomeDir() + "/.todo/")) {
     tabs.push_back(std::make_unique<TodoList>("List"));
   } else {
