@@ -1,9 +1,11 @@
 #include "input_dialog.h"
 #include "tab_manager.h"
 #include "todo_list.h"
+#include <curl/curl.h>
 #include <ncurses.h>
 
 int main() {
+  curl_global_init(CURL_GLOBAL_DEFAULT);
   initscr();
   cbreak();
   noecho();
@@ -73,6 +75,21 @@ int main() {
       break;
     }
 
+    case 'n':
+    case 'N': {
+      std::string tab_name = getInput(main_win, "Enter Notion tab name:");
+      if (tab_name.empty())
+        break;
+      std::string page_ref = getInput(main_win, "Notion page URL or ID:");
+      tabManager.addNotionTab(tab_name, page_ref);
+      break;
+    }
+
+    case 'r':
+    case 'R':
+      tabManager.reloadCurrent();
+      break;
+
     case 'x':
     case 'X':
       if (tabManager.tabCount() > 1) {
@@ -94,6 +111,7 @@ int main() {
 
   delwin(main_win);
   endwin();
+  curl_global_cleanup();
 
   return 0;
 }

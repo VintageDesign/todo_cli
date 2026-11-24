@@ -17,6 +17,14 @@ TodoList::TodoList(const std::string &tab_name)
   load();
 }
 
+TodoList::TodoList(const std::string &tab_name, bool)
+    : selected(0), scroll_offset(0), name(tab_name) {}
+
+void TodoList::clampSelection() {
+  if (selected >= (int)items.size())
+    selected = items.empty() ? 0 : (int)items.size() - 1;
+}
+
 void TodoList::sortList() {
   std::sort(items.begin(), items.end(),
             [](const TodoItem &a, const TodoItem &b) {
@@ -45,6 +53,7 @@ void TodoList::load() {
     items.push_back(item);
   }
   file.close();
+  clampSelection();
 }
 
 void TodoList::save() {
@@ -99,8 +108,16 @@ void TodoList::draw(WINDOW *win) {
   int height, width;
   getmaxyx(win, height, width);
 
-  mvwprintw(win, 1, 2, "Todo List: %s", name.c_str());
-  mvwprintw(win, 2, 2, "----------------------------------------");
+  mvwprintw(win, 1, 2, "Todo List: %s%s", name.c_str(),
+            isRemote() ? " [Notion]" : "");
+  if (error_message.empty()) {
+    mvwprintw(win, 2, 2, "----------------------------------------");
+  } else {
+    std::string msg = "! " + error_message;
+    if ((int)msg.length() > width - 4)
+      msg = msg.substr(0, width - 4);
+    mvwprintw(win, 2, 2, "%s", msg.c_str());
+  }
 
   if (items.empty()) {
     mvwprintw(win, 4, 2, "No items. Press 'a' to add one.");
@@ -146,8 +163,8 @@ void TodoList::draw(WINDOW *win) {
   }
 
   mvwprintw(win, height - 2, 2,
-            "a:Add Item d:Del Item Space:Toggle t:Add Tab x:Del Tab h/l:Switch "
-            "Tab q:Quit");
+            "a:Add d:Del Spc:Toggle t:Tab n:Notion x:Del Tab h/l:Switch "
+            "r:Refresh q:Quit");
   wrefresh(win);
 }
 
