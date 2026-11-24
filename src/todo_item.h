@@ -6,6 +6,7 @@
 struct TodoItem {
   std::string text;
   bool completed;
+  std::string id; // Notion block ID; empty for file-backed lists
 };
 
 #endif
