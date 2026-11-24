@@ -12,7 +12,8 @@ FetchContent_MakeAvailable(json)
 
 find_package(Curses REQUIRED)
 find_package(CURL REQUIRED)
-target_link_libraries(todo PRIVATE ${CURSES_LIBRARIES} CURL::libcurl
+find_package(ZLIB REQUIRED)
+target_link_libraries(todo PRIVATE ${CURSES_LIBRARIES} CURL::libcurl ZLIB::ZLIB
                                    nlohmann_json::nlohmann_json)
 target_include_directories(todo PRIVATE ${CURSES_INCLUDE_DIR})
 
